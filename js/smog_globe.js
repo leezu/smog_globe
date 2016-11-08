@@ -2,28 +2,29 @@ window.addEventListener('load', init, false);
 
 // Variables
 var camera, scene, renderer;
-var sphere;
+var sphere, atmosphere;
 var particle_light;
 
 function init() {
   // set up the scene, the camera and the renderer
-  createScene();
+  create_scene();
 
   // create the objects
-  sphere = createSphere(5, 32);
-
-  // add the objects
+  sphere = create_sphere(5, 32);
   scene.add(sphere);
 
+  atmosphere = create_atmosphere(5, 32);
+  scene.add(atmosphere);
+
   // add lights
-  createLights();
+  create_lights();
 
   // start a loop that will update the objects' positions
   // and render the scene on each frame
   loop();
 }
 
-function createScene() {
+function create_scene() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
   camera.position.y = 5;
@@ -35,7 +36,7 @@ function createScene() {
   document.body.appendChild( renderer.domElement );
 }
 
-function createSphere(radius, segments) {
+function create_sphere(radius, segments) {
   var geometry = new THREE.SphereGeometry(radius, segments, segments);
 
   var earth_texture = new THREE.TextureLoader().load("textures/earth_4k.jpg");
@@ -53,7 +54,25 @@ function createSphere(radius, segments) {
   return new THREE.Mesh(geometry, material);
 }
 
-function createLights() {
+function create_atmosphere(radius, segments) {
+  var geometry = new THREE.SphereGeometry(radius, segments, segments);
+
+  var material = new THREE.ShaderMaterial({
+    uniforms : {
+      glow_color: {type: "c", value: new THREE.Color(0xffffff)}
+    },
+    vertexShader:   document.getElementById('vertex_shader').textContent,
+    fragmentShader: document.getElementById('fragment_shader').textContent,
+    transparent: true
+  });
+
+  atmosphere = new THREE.Mesh(geometry, material.clone());
+  atmosphere.scale.multiplyScalar(1.1);
+
+  return atmosphere;
+}
+
+function create_lights() {
   var hemisphere_light = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.25 );
 	scene.add(hemisphere_light);
 

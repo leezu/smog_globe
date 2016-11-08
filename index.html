@@ -10,6 +10,17 @@
   </head>
   <body>
     <script src="js/three.js"></script>
+    <script id="vertex_shader" type="x-shader/x-vertex">
+     void main() {
+       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+     }
+    </script>
+    <script id="fragment_shader" type="x-shader/x-fragment">
+     uniform vec3 glow_color;
+     void main() {
+       gl_FragColor = vec4(glow_color, 0.25);
+     }
+    </script>
     <script src="js/smog_globe.js"></script>
   </body>
 </html>
