@@ -1,0 +1,1 @@
+- Texture from https://github.com/turban/webgl-earth/tree/master/images
