@@ -2,6 +2,7 @@ window.addEventListener('load', init, false);
 
 // Variables
 var camera, scene, renderer;
+var sphere;
 var particle_light;
 
 function init() {
@@ -9,7 +10,7 @@ function init() {
   createScene();
 
   // create the objects
-  var sphere = createSphere(5, 32);
+  sphere = createSphere(5, 32);
 
   // add the objects
   scene.add(sphere);
@@ -25,7 +26,9 @@ function init() {
 function createScene() {
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+  camera.position.y = 5;
   camera.position.z = 10;
+  camera.lookAt(new THREE.Vector3(0,0,0));
 
   renderer = new THREE.WebGLRenderer();
   renderer.setSize( window.innerWidth, window.innerHeight );
@@ -61,5 +64,8 @@ function createLights() {
 
 function loop() {
   requestAnimationFrame(loop);
+
+  sphere.rotateY(0.01);
+
   renderer.render(scene, camera);
 }
