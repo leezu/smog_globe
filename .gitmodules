@@ -1,0 +1,3 @@
+[submodule "js/jsmap"]
+	path = js/jsmap
+	url = git@github.com:aqicn/jsmap.git

@@ -1,11 +1,28 @@
-window.addEventListener('load', init, false);
+window.addEventListener('load', prepare_data, false);
 
 // Variables
 var camera, scene, renderer;
 var sphere, atmosphere;
 var particle_light;
 
-function init() {
+function prepare_data() {
+	jsmap.load({fps:25}).then(function(stream){
+		var frames = [];
+
+		stream.frames.subscribe(function(frame){
+
+			frames.push(frame);
+
+      if (frame.idx==stream.nframes-1) {
+        // All frames loaded, hide spinner and start WebGL globe.
+        document.getElementById("spinner").className = "loaded";
+        init(frames);
+      }
+    });
+  });
+}
+
+function init(frames) {
   // set up the scene, the camera and the renderer
   create_scene();
 
