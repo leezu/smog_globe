@@ -7,20 +7,28 @@
   </head>
   <body>
     <script src="js/jsmap/lib/bundle-jsmap-loader.js"></script>
+    <script src="https://unpkg.com/@reactivex/rxjs/dist/global/Rx.js"></script>
     <script src="js/three.js"></script>
     <script id="vertex_shader" type="x-shader/x-vertex">
+     varying vec2 vUv;
      void main() {
+       vUv = uv;
        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
      }
     </script>
     <script id="fragment_shader" type="x-shader/x-fragment">
      uniform vec3 glow_color;
+     uniform sampler2D texture;
+     varying vec2 vUv;
      void main() {
-       gl_FragColor = vec4(glow_color, 0.25);
+       vec4 baseColor = texture2D(texture, vUv);
+       gl_FragColor = baseColor;
+       gl_FragColor.a = 0.25;
      }
     </script>
     <script src="js/smog_globe.js"></script>
 
     <div id="spinner"></div>
+    <canvas id="texture_canvas"></canvas>
   </body>
 </html>
