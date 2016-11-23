@@ -2,8 +2,10 @@ window.addEventListener('load', prepare_data, false);
 
 // Variables
 var camera, scene, renderer;
-var sphere, atmosphere;
+var sphere, smog;
 var particle_light;
+
+var start = Date.now();
 
 function prepare_data() {
   frames_ls = localStorage.getItem("frames");
@@ -55,17 +57,20 @@ function update_texture(stream, frames, index, texture) {
   var imageData = ctx.createImageData(width, height);
 
   var pout = 0;
-  var colors = stream.lut.vcolors;
   var matrix = frame.matrix;
+
   for (var y = 0; y < height; y += 1) {
     var pin = width * (height - y - 1);
     for (var x = 0; x < width; x += 1, pin += 1) {
       var idx = matrix[pin];
-      var color = colors[idx];
-      imageData.data[pout++] = (color >> 16) & 0xff;
-      imageData.data[pout++] = (color >> 8) & 0xff;
-      imageData.data[pout++] = color & 0xff;
-      imageData.data[pout++] = idx ? 255 : 0;
+      var aqi = stream.lut.aqi[idx];
+      imageData.data[pout++] = 0;
+      imageData.data[pout++] = 0;
+      imageData.data[pout++] = 0;
+      // Let the minimum opacity given any air pollution be 100/255.
+      // Once the index surpasses 300 (even though the maximum is 500),
+      // we set 255/255 opacity.
+      imageData.data[pout++] = idx ? 100 + Math.round(155 * (aqi / 300.0)) : 0;
     }
   }
 
@@ -73,9 +78,6 @@ function update_texture(stream, frames, index, texture) {
   StackBlur.imageDataRGBA(imageData, 0, 0, width, height, 1);
 
   ctx.putImageData(imageData, 0, 0);
-
-  // TODO WebGL would like the canvas to have a power of 2 size..
-  // Otherwise warns and automatically resizes (so its not critical)
 
   texture.needsUpdate = true;
 
@@ -92,8 +94,8 @@ function init(stream, frames) {
   sphere = create_sphere(5, 32);
   scene.add(sphere);
 
-  atmosphere = create_atmosphere(5, 32, stream, frames);
-  scene.add(atmosphere);
+  smog = create_smog(5, 7, stream, frames);
+  scene.add(smog);
 
   // add lights
   create_lights();
@@ -133,8 +135,8 @@ function create_sphere(radius, segments) {
   return new THREE.Mesh(geometry, material);
 }
 
-function create_atmosphere(radius, segments, stream, frames) {
-  var geometry = new THREE.SphereGeometry(radius, segments, segments);
+function create_smog(radius, detail, stream, frames) {
+  var geometry = new THREE.IcosahedronGeometry(radius, detail);
   var texture = new THREE.Texture(document.getElementById("texture_canvas"));
 
   // texture.anisotropy = 16;
@@ -148,6 +150,10 @@ function create_atmosphere(radius, segments, stream, frames) {
         type: "t",
         value: texture
       },
+      time: {
+        type: "f",
+        value: 0.0
+      },
       glow_color: {
         type: "c",
         value: new THREE.Color(0xffffff)
@@ -158,10 +164,10 @@ function create_atmosphere(radius, segments, stream, frames) {
     transparent: true
   });
 
-  atmosphere = new THREE.Mesh(geometry, material.clone());
-  atmosphere.scale.multiplyScalar(1.025);
+  smog = new THREE.Mesh(geometry, material.clone());
+  smog.scale.multiplyScalar(1.15);
 
-  return atmosphere;
+  return smog;
 }
 
 function create_lights() {
@@ -176,8 +182,10 @@ function create_lights() {
 function loop() {
   requestAnimationFrame(loop);
 
-  sphere.rotateY(0.01);
-  atmosphere.rotateY(0.01);
+  sphere.rotateY(0.005);
+  smog.rotateY(0.005);
+
+  smog.material.uniforms["time"].value = 0.0001 * (Date.now() - start);
 
   renderer.render(scene, camera);
 }
