@@ -48,6 +48,8 @@ function update_texture(stream, frames, index, texture) {
   frame = frames[index];
   canvas = document.getElementById("texture_canvas");
 
+  document.getElementById("forecast_time").innerHTML = frame.datetime;
+
   var width = stream.size.width;
   var height = stream.size.height;
 
@@ -83,7 +85,7 @@ function update_texture(stream, frames, index, texture) {
 
   setTimeout(function() {
     update_texture(stream, frames, (index+1) % stream.nframes, texture);
-	}, 50);
+	}, 500);
 }
 
 function init(stream, frames) {
