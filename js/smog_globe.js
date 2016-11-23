@@ -49,6 +49,10 @@ function update_texture(stream, frames, index, texture) {
       imageData.data[pout++] = idx ? 255 : 0;
     }
   }
+
+  // Blur
+  StackBlur.imageDataRGBA(imageData, 0, 0, width, height, 1);
+
   ctx.putImageData(imageData, 0, 0);
 
   // TODO WebGL would like the canvas to have a power of 2 size..
@@ -113,6 +117,9 @@ function create_sphere(radius, segments) {
 function create_atmosphere(radius, segments, stream, frames) {
   var geometry = new THREE.SphereGeometry(radius, segments, segments);
   var texture = new THREE.Texture(document.getElementById("texture_canvas"));
+
+  // texture.anisotropy = 16;
+  texture.minFilter = THREE.LinearFilter;
 
   update_texture(stream, frames, 0, texture);
 
