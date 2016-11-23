@@ -6,21 +6,40 @@ var sphere, atmosphere;
 var particle_light;
 
 function prepare_data() {
-  jsmap.load({
-    fps: 25
-  }).then(function(stream) {
-    var frames = [];
+  frames_ls = localStorage.getItem("frames");
+  stream_ls = localStorage.getItem("stream");
 
-    stream.frames.subscribe(function(frame) {
-      frames.push(frame);
+  if (frames_ls == null || stream_ls == null) {
+    jsmap.load({
+      fps: 1000
+    }).then(function(stream) {
+      var frames = [];
 
-      if (frame.idx == stream.nframes - 1) {
-        // All frames loaded, hide spinner and start WebGL globe.
-        document.getElementById("spinner").className = "loaded";
-        init(stream, frames);
-      }
+      stream.frames.subscribe(function(frame) {
+        frames.push(frame);
+
+        if (frame.idx == stream.nframes - 1) {
+          // All frames loaded, hide spinner and start WebGL globe.
+          document.getElementById("spinner").className = "loaded";
+
+          // Save current forecast to localstorage
+          // TODO unfortunately frames can't be serialized in this way as it would be too big
+          //localStorage.setItem("frames", jQuery.stringify(frames));
+          //localStorage.setItem("stream", jQuery.stringify(stream));
+
+          init(stream, frames);
+        }
+      });
     });
-  });
+  } else {
+    frames = jQuery.parseJSON(frames_ls);
+    stream = jQuery.parseJSON(stream_ls);
+
+    // All frames loaded, hide spinner and start WebGL globe.
+    document.getElementById("spinner").className = "loaded";
+
+    init(stream, frames);
+  }
 }
 
 function update_texture(stream, frames, index, texture) {
