@@ -2,7 +2,7 @@ window.addEventListener('load', prepare_data, false);
 
 // Variables
 var camera, scene, renderer;
-var sphere, smog;
+var sphere, smog, atmosphere;
 var particle_light;
 
 var start = Date.now();
@@ -94,6 +94,9 @@ function init(stream, frames) {
   sphere = create_sphere(5, 32);
   scene.add(sphere);
 
+  atmosphere = create_atmosphere(5, 32);
+  scene.add(atmosphere);
+
   smog = create_smog(5, 7, stream, frames);
   scene.add(smog);
 
@@ -168,6 +171,25 @@ function create_smog(radius, detail, stream, frames) {
   smog.scale.multiplyScalar(1.15);
 
   return smog;
+}
+
+function create_atmosphere(radius, segments) {
+  var geometry = new THREE.SphereGeometry(radius, segments, segments);
+
+  var material = new THREE.ShaderMaterial({
+    uniforms : {
+      glow_color: {type: "c", value: new THREE.Color(0xffffff)}
+    },
+    vertexShader:   document.getElementById('vertex_shader_atmosphere').textContent,
+    fragmentShader: document.getElementById('fragment_shader_atmosphere').textContent,
+    transparent: true
+  });
+
+
+  atmosphere = new THREE.Mesh(geometry, material.clone());
+  atmosphere.scale.multiplyScalar(1.05);
+
+  return atmosphere;
 }
 
 function create_lights() {

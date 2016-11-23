@@ -11,6 +11,17 @@
     <script src="https://unpkg.com/@reactivex/rxjs/dist/global/Rx.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script src="js/three.js"></script>
+    <script id="vertex_shader_atmosphere" type="x-shader/x-vertex">
+     void main() {
+       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+     }
+    </script>
+    <script id="fragment_shader_atmosphere" type="x-shader/x-fragment">
+     uniform vec3 glow_color;
+     void main() {
+       gl_FragColor = vec4(glow_color, 0.15);
+     }
+    </script>
     <script id="vertex_shader" type="x-shader/x-vertex">
      //
      // Noise shader code by https://github.com/ashima/webgl-noise/blob/master/src/classicnoise3D.glsl
